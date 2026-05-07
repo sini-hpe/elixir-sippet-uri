@@ -36,8 +36,13 @@ defmodule SippetUri.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      # Docs dependencies
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+
+      # Test dependencies
+      {:excoveralls, "~> 0.10", only: :test},
+      {:credo, "~> 1.2", only: [:dev, :test]},
+      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false}
     ]
   end
 
