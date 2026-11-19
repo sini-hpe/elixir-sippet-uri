@@ -360,8 +360,10 @@ defmodule Sippet.URI do
   `Sippet.URI.parse/1` can be used to parse a wide range of URIs.
   When a SIP-URI is given without a port, the value returned by
   `Sippet.URI.default_port/1` for the SIP-URI's scheme is used for the `:port`
-  field. If a `%Sippet.URI{}` struct is given to this function, this function
-  returns it unmodified.
+  field. Telephone subscriber parameters before `@`, such as `phone-context`,
+  stay in `:userinfo`; only parameters after the host go into `:parameters`.
+  If a `%Sippet.URI{}` struct is given to this function, this function returns it
+  unmodified.
 
   ## Examples
 
@@ -382,7 +384,13 @@ defmodule Sippet.URI do
   def parse(%URI{} = uri), do: uri
 
   def parse(string) when is_binary(string) do
-    regex = ~r{^(([^:;?]+):)([^;?]+)([^?]*)(\?.*)?}
+    regex =
+      if Regex.match?(~r/^sips?:/i, string) do
+        # RFC 3261 allows semicolons and question marks in SIP userinfo.
+        ~r{^((sips?):)((?:[a-z0-9_.!~*'()%&=$+,;?/:#-]+@)?[^;?]+)([^?]*)(\?.*)?}i
+      else
+        ~r{^(([^:;?]+):)([^;?]+)([^?]*)(\?.*)?}
+      end
     parts = nillify(Regex.run(regex, string))
 
     case parts do

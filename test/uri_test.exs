@@ -5,6 +5,35 @@ defmodule Sippet.URI.Test do
 
   doctest Sippet.URI
 
+  test "keeps telephone subscriber parameters before @ in SIP userinfo" do
+    raw = "sip:3470001234;phone-context=domain@domain;user=phone"
+
+    assert {:ok,
+            %URI{
+              userinfo: "3470001234;phone-context=domain",
+              authority: "3470001234;phone-context=domain@domain",
+              host: "domain",
+              parameters: ";user=phone"
+            } = uri} = URI.parse(raw)
+
+    assert URI.to_string(uri) == raw
+  end
+
+  test "separates SIPS userinfo from host, URI parameters and headers" do
+    raw = "sips:alice?team;shift@[2001:db8::1]:5071;transport=tcp?To=bob%40example.com"
+
+    assert {:ok,
+            %URI{
+              userinfo: "alice?team;shift",
+              host: "2001:db8::1",
+              port: 5071,
+              parameters: ";transport=tcp",
+              headers: "?To=bob%40example.com"
+            } = uri} = URI.parse(raw)
+
+    assert URI.to_string(uri) == raw
+  end
+
   test "equivalent" do
     a = URI.parse!("sip:%61lice@atlanta.com;transport=TCP")
     b = URI.parse!("sip:alice@AtLanTa.CoM;Transport=tcp")
